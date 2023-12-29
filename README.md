@@ -20,10 +20,10 @@ make
 This tool works in two modes: you can either (1) specify  a  text  file  that contains the values of a lookup table, or (2) describe a math function by providing its equation.
 
 #### 1) Lookup Table as a Text File
-In this mode, you need to prepare a text (.txt) file, contaning the values of your lookup table. The file must contains a power of 2 lines, each of which is a single integer value. If your lookup table has non-integer fractional values, you must convert all the values into a fixed-point representation and then store them as integer values by ignoring decimal points in their fixed-point representation. An example of such a text file can be found in examples/mytable1.txt. The following command generates hardware files corresponding to the lookup table described in that text file.
+In this mode, you need to prepare a text (.txt) file, contaning the values of your lookup table. The file must contains a power of 2 lines, each of which is a single integer value. If your lookup table has non-integer fractional values, you must convert all the values into a fixed-point representation and then store them as integer values by ignoring decimal points in their fixed-point representation. An example of such a text file can be found in example.txt. The following command generates hardware files corresponding to the lookup table described in that text file.
 
 ```bash
-./compressedlut -table ./examples/mytable1.txt
+./compressedlut -table example.txt
 ```
 
 #### 2) Lookup Table as a Math Equation
