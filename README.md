@@ -1,35 +1,67 @@
 # CompressedLUT
-A tool to generate optimized hardware files for univariate functions.
+Lookup tables are widely used in hardware applications to store arrays of constant values. They can be directly used to evaluate nonlinear functions or used as a part of other approximate methods (e.g., piecewise linear approximation and biparitite tables) to compute such functions. CompressedLUT is a tool for lossless compression of lookup tables and genration of their hardware files in Verilog and C++ for RTL and HLS designs. 
 
-Written by: 
-	     Alireza Khataei, Kia Bazargan, University of Minnesota
-	     kia@umn.edu
+CompressedLUT has been developed as a part of the following publication. Please refer to it for more information.
+> Alireza Khataei and Kia Bazargan. 2024. CompressedLUT: An Open Source Tool for Lossless Compression of Lookup Tables for Function Evaluation and Beyond. In Proceedings of the 2024 ACM/SIGDA International Symposium on Field Programmable Gate Arrays (FPGA '24). Association for Computing Machinery, New York, NY, USA
+
+## Authors
+- Alireza Khataei, University of Minnesota, Minneapolis, MN, USA
+- Kia Bazargan (kia@umn.edu), University of Minnesota, Minneapolis, MN, USA
 
 
-Copyright & License Notice
--------------------------------------------------------------------
-The CompressedLUT package is copyrighted  by  the  Regents  of  the
-University of Minnesota. It can be freely used for educational  and
-research purposes  by  non-profit  institutions  and  US government
-agencies only. Other organizations are allowed to use CompressedLUT
-only for evaluation purposes, and any  further  uses  will  require 
-prior approval. The software  may  not  be  sold  or  redistributed 
-without prior approval. One may make copies  of  the  software  for 
-their use provided that the copies, are  not  sold  or distributed, 
-are used under the same terms and conditions.
+## Installation
+```bash
+git clone https://github.com/kiabuzz/CompressedLUT.git
+cd CompressedLUT
+make
+```
+    
+## Getting Started
+This tool works in two modes: you can either (1) specify  a  text  file  that contains the values of a lookup table, or (2) describe a math function by providing its equation.
 
-As unestablished research software, this code  is  provided  on  an
-``as is'' basis without warranty of any kind, either  expressed  or
-implied. The downloading, or executing any part  of  this  software
-constitutes an implicit agreement to these terms. These  terms  and
-conditions are subject to change at any time without  prior notice.
--------------------------------------------------------------------
-Instructions
--------------------------------------------------------------------
+#### 1) Lookup Table as a Text File
+In this mode, you need to prepare a text (.txt) file, contaning the values of your lookup table. The file must contains a power of 2 lines, each of which is a single integer value. If your lookup table has non-integer fractional values, you must convert all the values into a fixed-point representation and then store them as integer values by ignoring decimal points in their fixed-point representation. An example of such a text file can be found in examples/mytable1.txt. The following command generates hardware files corresponding to the lookup table described in that text file.
 
-This program generates source code  for  univariate  functions.  It 
-works in two modes: you can either (1) specify  a  .txt  file  that 
-contains the values of a look-up table specifying f(x)  for  all  x 
-values, or (2) describe the function by providing its equation.
+```bash
+./compressedlut -table ./examples/mytable1.txt
+```
 
-See the help.txt file for commmand line arguments.
+#### 2) Lookup Table as a Math Equation
+In this mode, you need to specify a math function by providing its equation and fixed-point quantization parameters. The following command is an example of this mode.
+
+```bash
+./compressedlut -function "exp(x-1)" -f_in 10 -f_out 12
+```
+
+The command above generates hardware files for implementing the math function exp(x-1). The function is evaluated in [0, 1) using 10 fractional bits for inputs and 12 fractional bits for outputs. The bit width of the integer part in the outputs are determined automatically. To evaluate this function in ranges other than [0, 1), you can modify the equation by scaling and shifting its input variable x.
+
+It is worth noting that you can use your customized script to evaluate a math function, then store its output values in a text file, and finally compress and implement it using CompressedLUT in the first mode.
+
+See the help.txt file for commmand line arguments in more details.
+
+## Citation
+```bibtex
+@inproceedings{compressedlut,
+    author = {Khataei, Alireza and Bazargan, Kia},
+    title = {CompressedLUT: An Open Source Tool for Lossless Compression of Lookup Tables for Function Evaluation and Beyond},
+    year = {2024},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    url = {},
+    doi = {},
+    booktitle = {Proceedings of the 2024 ACM/SIGDA International Symposium on Field Programmable Gate Arrays},
+    pages = {},
+    numpages = {},
+    location = {Monterey, CA, USA},
+    series = {FPGA '24}
+}
+```
+
+## Copyright & License Notice
+The CompressedLUT package is copyrighted by the Regents of the University of Minnesota. It can be freely used for educational and research purposes by non-profit institutions and US government agencies only. Other organizations are allowed to use CompressedLUT only for evaluation purposes, and any further uses will require prior approval. The software may not be sold or redistributed without prior approval. One may make copies of the software for their use provided that the copies, are not sold or distributed, are used under the same terms and conditions.
+
+As unestablished research software, this code is provided on an ``as is'' basis without warranty of any kind, either expressed or implied. The downloading, or executing any part of this software constitutes an implicit agreement to these terms. These terms and conditions are subject to change at any time without prior notice.
+
+
+## Acknowledgements
+This material is based upon work supported in part by Cisco Systems, Inc. under grant number 1085913, and by the National Science Foundation under grant number PFI-TT 2016390.
