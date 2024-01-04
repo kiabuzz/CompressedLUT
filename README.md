@@ -2,7 +2,7 @@
 Lookup tables are widely used in hardware applications to store arrays of constant values. They can be directly used to evaluate nonlinear functions or used as a part of other approximate methods (e.g., piecewise linear approximation and biparitite tables) to compute such functions. CompressedLUT is a tool for lossless compression of lookup tables and genration of their hardware files in Verilog and C++ for RTL and HLS designs. 
 
 CompressedLUT has been developed as a part of the following publication. Please refer to it for more information.
-> Alireza Khataei and Kia Bazargan. 2024. CompressedLUT: An Open Source Tool for Lossless Compression of Lookup Tables for Function Evaluation and Beyond. In Proceedings of the 2024 ACM/SIGDA International Symposium on Field Programmable Gate Arrays (FPGA '24). Association for Computing Machinery, New York, NY, USA
+> Alireza Khataei and Kia Bazargan. 2024. CompressedLUT: An Open Source Tool for Lossless Compression of Lookup Tables for Function Evaluation and Beyond. In Proceedings of the 2024 ACM/SIGDA International Symposium on Field Programmable Gate Arrays (FPGA ’24), March 3–5, 2024, Monterey, CA, USA. ACM, New York, NY, USA, 10 pages. https://doi.org/10.1145/3626202.3637575
 
 ## Authors
 - Alireza Khataei, University of Minnesota, Minneapolis, MN, USA
@@ -19,14 +19,14 @@ make
 ## Getting Started
 This tool works in two modes: you can either (1) specify  a  text  file  that contains the values of a lookup table, or (2) describe a math function by providing its equation.
 
-#### 1) Lookup Table as a Text File
+#### 1. Lookup Table as a Text File
 In this mode, you need to prepare a text (.txt) file, contaning the values of your lookup table. The file must contains a power of 2 lines, each of which is a single integer value. If your lookup table has non-integer fractional values, you must convert all the values into a fixed-point representation and then store them as integer values by ignoring decimal points in their fixed-point representation. An example of such a text file can be found in example.txt. The following command generates hardware files corresponding to the lookup table described in that text file.
 
 ```bash
 ./compressedlut -table example.txt
 ```
 
-#### 2) Lookup Table as a Math Equation
+#### 2. Lookup Table as a Math Equation
 In this mode, you need to specify a math function by providing its equation and fixed-point quantization parameters. The following command is an example of this mode.
 
 ```bash
@@ -40,24 +40,26 @@ It is worth noting that you can use your customized script to evaluate a math fu
 See the help.txt file for commmand line arguments in more details.
 
 ## Citation
+CompressedLUT has been developed as a part of the following publication.
+
 ```bibtex
-@inproceedings{compressedlut,
+@inproceedings{compressedlut_fpga,
     author = {Khataei, Alireza and Bazargan, Kia},
     title = {CompressedLUT: An Open Source Tool for Lossless Compression of Lookup Tables for Function Evaluation and Beyond},
     year = {2024},
     publisher = {Association for Computing Machinery},
     address = {New York, NY, USA},
-    url = {},
-    doi = {},
+    url = {https://doi.org/10.1145/3626202.3637575},
+    doi = {10.1145/3626202.3637575},
     booktitle = {Proceedings of the 2024 ACM/SIGDA International Symposium on Field Programmable Gate Arrays},
     pages = {},
-    numpages = {},
+    numpages = {10},
     location = {Monterey, CA, USA},
     series = {FPGA '24}
 }
 ```
 
-> Alireza Khataei and Kia Bazargan. 2024. CompressedLUT: An Open Source Tool for Lossless Compression of Lookup Tables for Function Evaluation and Beyond. In Proceedings of the 2024 ACM/SIGDA International Symposium on Field Programmable Gate Arrays (FPGA '24). Association for Computing Machinery, New York, NY, USA
+> Alireza Khataei and Kia Bazargan. 2024. CompressedLUT: An Open Source Tool for Lossless Compression of Lookup Tables for Function Evaluation and Beyond. In Proceedings of the 2024 ACM/SIGDA International Symposium on Field Programmable Gate Arrays (FPGA ’24), March 3–5, 2024, Monterey, CA, USA. ACM, New York, NY, USA, 10 pages. https://doi.org/10.1145/3626202.3637575
 
 ## Copyright & License Notice
 The CompressedLUT package is copyrighted by the Regents of the University of Minnesota. It can be freely used for educational and research purposes by non-profit institutions and US government agencies only. Other organizations are allowed to use CompressedLUT only for evaluation purposes, and any further uses will require prior approval. The software may not be sold or redistributed without prior approval. One may make copies of the software for their use provided that the copies, are not sold or distributed, are used under the same terms and conditions.
