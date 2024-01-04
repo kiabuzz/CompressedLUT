@@ -1,6 +1,5 @@
 Instructions
 -------------------------------------------------------------------
-
 This program generates source code  for  univariate  functions.  It 
 works in two modes: you can either (1) specify  a  .txt  file  that 
 contains the values of a look-up table specifying f(x)  for  all  x 
@@ -25,7 +24,6 @@ values, or (2) describe the function by providing its equation.
 	                          function's  output.  The   output 
 	                          integer bit width  is  determined 
 	                          automatically.
-
 
 The following optional arguments can be used in either mode.
 	-name (string)		: output  table   and   file   name
