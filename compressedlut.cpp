@@ -460,9 +460,14 @@ void compressedlut::rtl(const string& file_path, const string& table_name, const
         if (w_ust != 0) 
         {
             if (w_idx != 0) 
-                file << "wire [" << w_ust - 1 << ":0] u; " << table_name << "_ust_" << level << " ust_" << level << "_inst({i, address[" << w_s << ":0]}, u);";
+                file << "wire [" << w_ust - 1 << ":0] u; " << table_name << "_ust_" << level << " ust_" << level << "_inst({i, address[" << w_s - 1 << ":0]}, u);";
             else 
-                file << "wire [" << w_ust - 1 << ":0] u; " << table_name << "_ust_" << level << " ust_" << level << "_inst(address[" << w_s << ":0], u);";
+            {
+                if(t_idx.size() == 0)
+                    file << "wire [" << w_ust - 1 << ":0] u; " << table_name << "_ust_" << level << " ust_" << level << "_inst(address, u);";
+                else
+                    file << "wire [" << w_ust - 1 << ":0] u; " << table_name << "_ust_" << level << " ust_" << level << "_inst(address[" << w_s - 1 << ":0], u);";
+            }
         }
 
         file << "\n\nalways @(*) begin\n";
@@ -618,11 +623,13 @@ void compressedlut::hls(const string& file_path, const string& table_name, const
             {
                 file << "\tap_uint<" << w_idx+w_s << "> ust_idx; ust_idx.range(" << w_idx+w_s-1 << ", " << w_s << ") = i; ust_idx.range(" << w_s-1 << ", 0) = address.range(" << w_s-1 <<", 0); ";
                 file << "ap_uint<" << w_ust << "> u = " << table_name << "_ust_" << level  << "[ust_idx];\n";
-
             }
             else 
             {
-                file << "\tap_uint<" << w_ust << "> u = " << table_name << "_ust_" << level  << "[" << "address.range(" << w_s-1 <<", 0)" <<"];\n";
+                if(t_idx.size() == 0)
+                    file << "\tap_uint<" << w_ust << "> u = " << table_name << "_ust_" << level  << "[address];\n";
+                else
+                    file << "\tap_uint<" << w_ust << "> u = " << table_name << "_ust_" << level  << "[" << "address.range(" << w_s-1 <<", 0)" <<"];\n";
             }
         }
 
