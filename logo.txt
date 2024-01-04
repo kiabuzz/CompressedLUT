@@ -5,8 +5,17 @@
 CompressedLUT
 
 Written by: 
-	     Alireza Khataei, Kia Bazargan, University of Minnesota
-	     kia@umn.edu
+	Alireza Khataei, Kia Bazargan, University of Minnesota
+	kia@umn.edu
+
+CompressedLUT has been developed as a part of the following paper:
+	Alireza Khataei and Kia Bazargan.  2024.  CompressedLUT: An 
+	Open Source Tool for Lossless Compression of Lookup  Tables
+	for Function Evaluation and Beyond. In Proceedings  of  the 
+	2024   ACM/SIGDA   International   Symposium    on    Field 
+	Programmable  Gate  Arrays  (FPGA ’24),  March 3–5,   2024, 
+	Monterey, CA,  USA.  ACM,  New York,  NY,  USA,  10  pages. 
+	https://doi.org/10.1145/3626202.3637575
 
 
 Copyright & License Notice
@@ -26,4 +35,5 @@ As unestablished research software, this code  is  provided  on  an
 implied. The downloading, or executing any part  of  this  software
 constitutes an implicit agreement to these terms. These  terms  and
 conditions are subject to change at any time without  prior notice.
--------------------------------------------------------------------
+
+
