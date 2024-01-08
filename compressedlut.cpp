@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
     }
 
     cout << "Results\n-------------------------------------------------------------------\n";
-    vector<int> table_data;
+    vector<long int> table_data;
 
     if(is_table)
     {
@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
         {
             string line;
             while (getline(table_file, line)) {
-                int value;
+                long int value;
                 istringstream iss(line);
                 iss >> value;
                 table_data.push_back(value);
@@ -123,13 +123,13 @@ int main(int argc, char* argv[])
         }
     }
     
-    int initial_bias = *min_element(table_data.begin(), table_data.end());
+    long int initial_bias = *min_element(table_data.begin(), table_data.end());
     if(initial_bias != 0)
         for(int i =0; i < table_data.size(); i++)
             table_data.at(i) -= initial_bias;
 
-    int initial_size;
-    vector<int> final_size;
+    long int initial_size;
+    vector<long int> final_size;
 
     compressedlut::compressedlut(table_data, table_name, output_path, configs, &initial_size, final_size);
 
@@ -152,13 +152,13 @@ int main(int argc, char* argv[])
 
 }
 
-void compressedlut::compressedlut(const vector<int>& table_data, const string& table_name, const string& output_path, struct struct_configs configs, int* initial_size, vector<int>& final_size)
+void compressedlut::compressedlut(const vector<long int>& table_data, const string& table_name, const string& output_path, struct struct_configs configs, long int* initial_size, vector<long int>& final_size)
 {
-    vector<vector<int>> all_cost;
+    vector<vector<long int>> all_cost;
     vector<int> all_w_in, all_w_out, all_w_l, all_w_s;
-    vector<vector<int>> all_t_lb, all_t_ust, all_t_bias, all_t_idx, all_t_rsh;
+    vector<vector<long int>> all_t_lb, all_t_ust, all_t_bias, all_t_idx, all_t_rsh;
     
-    vector<int> t = table_data;
+    vector<long int> t = table_data;
 
     while (true) 
     {
@@ -166,28 +166,28 @@ void compressedlut::compressedlut(const vector<int>& table_data, const string& t
         int w_out = bit_width(*max_element(t.begin(), t.end()));
 
         bool compressed = 0;
-        int best_cost = (1 << w_in) * w_out;
+        long int best_cost = (1 << w_in) * w_out;
         int best_w_l, best_w_s;
-        vector<int> best_t_lb, best_t_ust, best_t_bias, best_t_idx, best_t_rsh;
+        vector<long int> best_t_lb, best_t_ust, best_t_bias, best_t_idx, best_t_rsh;
 
         int max_w_l = (configs.hbs)? w_out-1 : 0;
 
         for (int w_l = 0; w_l <= max_w_l; w_l++) 
         {
-            vector<int> t_hb;
-            vector<int> t_lb;
+            vector<long int> t_hb;
+            vector<long int> t_lb;
             for(int i = 0; i < t.size(); i++)
             {
                 t_hb.push_back(t.at(i) >> w_l);
-                t_lb.push_back(t.at(i) & ((1 << w_l) - 1));
+                t_lb.push_back(t.at(i) & (((long)1 << w_l) - 1));
             }
             
-            int cost_t_lb = (1 << w_in) * bit_width(*max_element(t_lb.begin(), t_lb.end()));
+            long int cost_t_lb = (1 << w_in) * bit_width(*max_element(t_lb.begin(), t_lb.end()));
 
             for(int w_s = configs.mdbw; w_s < w_in ; w_s++)
             {
-                vector<int> t_ust, t_bias, t_idx, t_rsh;
-                int cost_t_hb = hb_compression(configs.ssc,t_hb, w_s, t_ust, t_bias, t_idx, t_rsh);
+                vector<long int> t_ust, t_bias, t_idx, t_rsh;
+                long int cost_t_hb = hb_compression(configs.ssc,t_hb, w_s, t_ust, t_bias, t_idx, t_rsh);
                 if((cost_t_hb + cost_t_lb) < best_cost)
                 {
                     compressed = 1;
@@ -205,7 +205,7 @@ void compressedlut::compressedlut(const vector<int>& table_data, const string& t
 
         if(compressed)
         {
-            vector<int> cost = {(1 << w_in) * w_out, best_cost};
+            vector<long int> cost = {(1 << w_in) * w_out, best_cost};
             all_cost.push_back(cost);
             all_w_in.push_back(w_in);
             all_w_out.push_back(w_out);
@@ -243,18 +243,18 @@ void compressedlut::compressedlut(const vector<int>& table_data, const string& t
     }
 }
 
-int compressedlut::hb_compression(bool ssc, const vector<int>& t_hb, int w_s, vector<int>& t_ust, vector<int>& t_bias, vector<int>& t_idx, vector<int>& t_rsh)
+long int compressedlut::hb_compression(bool ssc, const vector<long int>& t_hb, int w_s, vector<long int>& t_ust, vector<long int>& t_bias, vector<long int>& t_idx, vector<long int>& t_rsh)
 {
     const int w_in = bit_width(t_hb.size()-1);
     const int w_out = bit_width(*max_element(t_hb.begin(), t_hb.end()));
-    const int num_sub_table = (1 << (w_in - w_s));
-    const int len_sub_table = (1 << w_s);
+    const long int num_sub_table = (1 << (w_in - w_s));
+    const  int len_sub_table = (1 << w_s);
 
-    vector<int> t_st(num_sub_table*len_sub_table);
+    vector<long int> t_st(num_sub_table*len_sub_table);
 
     for(int i = 0; i < num_sub_table; i++) 
     {
-        int bias = *min_element(t_hb.begin() + i*len_sub_table, t_hb.begin() + (i+1)*len_sub_table);
+        long int bias = *min_element(t_hb.begin() + i*len_sub_table, t_hb.begin() + (i+1)*len_sub_table);
         t_bias.push_back(bias);
         for(int j = 0; j < len_sub_table; j++)
             t_st.at(i*len_sub_table+j) = t_hb.at(i*len_sub_table+j) - bias;
@@ -271,18 +271,18 @@ int compressedlut::hb_compression(bool ssc, const vector<int>& t_hb, int w_s, ve
     {
         std::vector<std::vector<bool>> sm(num_sub_table, std::vector<bool>(num_sub_table, false));
         std::vector<std::vector<int>> sm_rsh(num_sub_table, std::vector<int>(num_sub_table, 0));
-        vector<int> sv(num_sub_table);
-        for(int i = 0; i < num_sub_table; i++)
+        vector<long int> sv(num_sub_table);
+        for(long int i = 0; i < num_sub_table; i++)
         {
-            for(int j = i+1; j < num_sub_table; j++)
+            for(long int j = i+1; j < num_sub_table; j++)
             {
                 bool i_generates_j = true, j_generates_i = true;
                 for(int rsh = 0; rsh < 4; rsh++)
                 {
                     for (int p = 0; p < len_sub_table; p++)
                     {
-                        int value_i = t_st.at(i*len_sub_table+p);
-                        int value_j = t_st.at(j*len_sub_table+p);
+                        long int value_i = t_st.at(i*len_sub_table+p);
+                        long int value_j = t_st.at(j*len_sub_table+p);
                         i_generates_j = ((value_i >> rsh) == value_j);
                         j_generates_i = ((value_j >> rsh) == value_i);
                         if(i_generates_j == false && j_generates_i == false)
@@ -312,15 +312,15 @@ int compressedlut::hb_compression(bool ssc, const vector<int>& t_hb, int w_s, ve
         t_idx.resize(num_sub_table);
         t_rsh.resize(num_sub_table);
         vector<bool> sub_table_derived(num_sub_table, false);
-        int unique_idx = 0;
+        long int unique_idx = 0;
 
         while(any_of(sv.begin(), sv.end(), [](bool v){return v;}))
         {
-            int idx_unique = distance(sv.begin(), max_element(sv.begin(), sv.end()));
+            long int idx_unique = distance(sv.begin(), max_element(sv.begin(), sv.end()));
             t_idx.at(idx_unique) = unique_idx;
             t_rsh.at(idx_unique) = 0;
             sub_table_derived.at(idx_unique) = true;
-            for(int idx = 0; idx < num_sub_table; idx++)
+            for(long int idx = 0; idx < num_sub_table; idx++)
             {
                 if(sm.at(idx_unique).at(idx))
                 {
@@ -329,7 +329,7 @@ int compressedlut::hb_compression(bool ssc, const vector<int>& t_hb, int w_s, ve
                     sub_table_derived.at(idx) = true;
                     fill(sm.at(idx).begin(), sm.at(idx).end(), false);
                     sv.at(idx) = 0;
-                    for(int i = 0; i < num_sub_table; i++)
+                    for(long int i = 0; i < num_sub_table; i++)
                     {
                         if(sm.at(i).at(idx))
                         {
@@ -340,7 +340,7 @@ int compressedlut::hb_compression(bool ssc, const vector<int>& t_hb, int w_s, ve
                 }
             }
 
-            for(int i = 0; i < num_sub_table; i++)
+            for(long int i = 0; i < num_sub_table; i++)
             {
                 if(sm.at(i).at(idx_unique))
                 {
@@ -357,7 +357,7 @@ int compressedlut::hb_compression(bool ssc, const vector<int>& t_hb, int w_s, ve
         }
 
         
-        for(int i = 0; i < num_sub_table; i++)
+        for(long int i = 0; i < num_sub_table; i++)
         {
             if(!sub_table_derived.at(i))
             {
@@ -377,21 +377,21 @@ int compressedlut::hb_compression(bool ssc, const vector<int>& t_hb, int w_s, ve
     int w_bias = bit_width(*max_element(t_bias.begin(), t_bias.end()));
     int w_rsh = bit_width(*max_element(t_rsh.begin(), t_rsh.end()));
     int w_idx = bit_width(*max_element(t_idx.begin(), t_idx.end()));
-    return t_ust.size() * w_ust + (1 << (w_in - w_s)) * (w_bias + w_rsh + w_idx); // ?
+    return t_ust.size() * w_ust + (1 << (w_in - w_s)) * (w_bias + w_rsh + w_idx);
 }
 
-void compressedlut::rtl(const string& file_path, const string& table_name, const vector<int>& all_w_in, const vector<int>& all_w_out, const vector<int>& all_w_l, const vector<int>& all_w_s, const vector<vector<int>>& all_t_lb, const vector<vector<int>>& all_t_ust, const vector<vector<int>>& all_t_bias, const vector<vector<int>>& all_t_idx, const vector<vector<int>>& all_t_rsh, int max_level)
+void compressedlut::rtl(const string& file_path, const string& table_name, const vector<int>& all_w_in, const vector<int>& all_w_out, const vector<int>& all_w_l, const vector<int>& all_w_s, const vector<vector<long int>>& all_t_lb, const vector<vector<long int>>& all_t_ust, const vector<vector<long int>>& all_t_bias, const vector<vector<long int>>& all_t_idx, const vector<vector<long int>>& all_t_rsh, int max_level)
 {
     ofstream file_init(file_path);
     file_init.close();
 
     for (int level = max_level; level >= 1; level--) 
     {
-        const vector<int> t_lb = all_t_lb.at(level-1);
-        const vector<int> t_ust = all_t_ust.at(level-1);
-        const vector<int> t_bias = all_t_bias.at(level-1);
-        const vector<int> t_idx = all_t_idx.at(level-1);
-        const vector<int> t_rsh = all_t_rsh.at(level-1);
+        const vector<long int> t_lb = all_t_lb.at(level-1);
+        const vector<long int> t_ust = all_t_ust.at(level-1);
+        const vector<long int> t_bias = all_t_bias.at(level-1);
+        const vector<long int> t_idx = all_t_idx.at(level-1);
+        const vector<long int> t_rsh = all_t_rsh.at(level-1);
 
         const int w_in = all_w_in.at(level-1);
         const int w_out = all_w_out.at(level-1);
@@ -504,9 +504,10 @@ void compressedlut::rtl(const string& file_path, const string& table_name, const
 
         file.close();
     }
+
 }
 
-void compressedlut::plaintable_rtl(const string& file_path, const string& table_name, const vector<int>& table_data) 
+void compressedlut::plaintable_rtl(const string& file_path, const string& table_name, const vector<long int>& table_data) 
 {
     ofstream file(file_path, ios::app);
 
@@ -518,7 +519,7 @@ void compressedlut::plaintable_rtl(const string& file_path, const string& table_
     file << "output reg [" << w_out - 1 << ":0] data;\n\n";
     file << "always @(*) begin\n";
     file << "\tcase(address)\n";
-    for (int i = 0; i < table_data.size(); i++) 
+    for (long int i = 0; i < table_data.size(); i++) 
     {
         file << "\t\t" << w_in << "'d" << i << ": ";
         file << "data = " << w_out << "'d" << table_data.at(i) << ";\n";
@@ -530,7 +531,7 @@ void compressedlut::plaintable_rtl(const string& file_path, const string& table_
 }
 
 
-void compressedlut::hls(const string& file_path, const string& table_name, const vector<int>& all_w_in, const vector<int>& all_w_out, const vector<int>& all_w_l, const vector<int>& all_w_s, const vector<vector<int>>& all_t_lb, const vector<vector<int>>& all_t_ust, const vector<vector<int>>& all_t_bias, const vector<vector<int>>& all_t_idx, const vector<vector<int>>& all_t_rsh, int max_level)
+void compressedlut::hls(const string& file_path, const string& table_name, const vector<int>& all_w_in, const vector<int>& all_w_out, const vector<int>& all_w_l, const vector<int>& all_w_s, const vector<vector<long int>>& all_t_lb, const vector<vector<long int>>& all_t_ust, const vector<vector<long int>>& all_t_bias, const vector<vector<long int>>& all_t_idx, const vector<vector<long int>>& all_t_rsh, int max_level)
 {
     ofstream file(file_path);
     file << "#include <ap_int.h>\n";
@@ -538,11 +539,11 @@ void compressedlut::hls(const string& file_path, const string& table_name, const
 
     for (int level = max_level; level >= 1; level--) 
     {
-        const vector<int> t_lb = all_t_lb.at(level-1);
-        const vector<int> t_ust = all_t_ust.at(level-1);
-        const vector<int> t_bias = all_t_bias.at(level-1);
-        const vector<int> t_idx = all_t_idx.at(level-1);
-        const vector<int> t_rsh = all_t_rsh.at(level-1);
+        const vector<long int> t_lb = all_t_lb.at(level-1);
+        const vector<long int> t_ust = all_t_ust.at(level-1);
+        const vector<long int> t_bias = all_t_bias.at(level-1);
+        const vector<long int> t_idx = all_t_idx.at(level-1);
+        const vector<long int> t_rsh = all_t_rsh.at(level-1);
 
         const int w_in = all_w_in.at(level-1);
         const int w_out = all_w_out.at(level-1);
@@ -665,7 +666,7 @@ void compressedlut::hls(const string& file_path, const string& table_name, const
 
 }
 
-void compressedlut::plaintable_hls(const string& file_path, const string& table_name, const vector<int>& table_data) 
+void compressedlut::plaintable_hls(const string& file_path, const string& table_name, const vector<long int>& table_data) 
 {
     ofstream file(file_path, ios::app);
 
@@ -673,7 +674,7 @@ void compressedlut::plaintable_hls(const string& file_path, const string& table_
     int w_out = bit_width(*max_element(table_data.begin(), table_data.end()));
 
     file << "\n\tconst ap_uint<" << w_out << "> " << table_name << "[" << table_data.size() << "] = {";
-    for (int i = 0; i < table_data.size(); i++) 
+    for (long int i = 0; i < table_data.size(); i++) 
     {
         file << table_data.at(i);
         if(i == (table_data.size()-1))
@@ -687,7 +688,7 @@ void compressedlut::plaintable_hls(const string& file_path, const string& table_
     file.close();
 }
 
-int compressedlut::bit_width(int value) 
+int compressedlut::bit_width(long int value) 
 {
     if (value == 0)
         return 0;
