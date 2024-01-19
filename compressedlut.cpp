@@ -67,6 +67,7 @@ int main(int argc, char* argv[])
 
     cout << "Results\n-------------------------------------------------------------------\n";
     vector<long int> table_data;
+    bool is_signed = false;
 
     if(is_table)
     {
@@ -76,8 +77,7 @@ int main(int argc, char* argv[])
             string line;
             while (getline(table_file, line)) {
                 long int value;
-                istringstream iss(line);
-                iss >> value;
+                value = stoi(line, 0, 16);
                 table_data.push_back(value);
             }
             table_file.close();
@@ -121,12 +121,20 @@ int main(int argc, char* argv[])
             }
             table_data.push_back(round(y * (1 << f_out)));
         }
+
+        long int min_value = *min_element(table_data.begin(), table_data.end());
+        if(min_value < 0)
+        {
+            is_signed = true;
+            long int max_value = *max_element(table_data.begin(), table_data.end());
+            int w = compressedlut::bit_width_signed(min_value, max_value);
+            for(int i =0; i < table_data.size(); i++)
+            {
+                if(table_data.at(i) < 0)
+                    table_data.at(i) += ((long int)1 << w);
+            }
+        }
     }
-    
-    long int initial_bias = *min_element(table_data.begin(), table_data.end());
-    if(initial_bias != 0)
-        for(int i =0; i < table_data.size(); i++)
-            table_data.at(i) -= initial_bias;
 
     long int initial_size;
     vector<long int> final_size;
@@ -135,13 +143,29 @@ int main(int argc, char* argv[])
 
     if(final_size.size() != 0)
     {
-        if(initial_bias != 0)
-            cout << "Warning: " << initial_bias << " must be added to the generated output values as an initial bias." << endl;
         cout << "Information: The table was compressed successfully!" << endl;
-        
-        cout << "Information: The results are as follows." << endl;
+
+        int w_in = compressedlut::bit_width(table_data.size()-1);
+        int w_out = compressedlut::bit_width(*max_element(table_data.begin(), table_data.end()));
+        if(is_table)
+        {
+            cout << "\nInformation: The input and output bit width are as follows." << endl;
+            cout << "--> Input Bit Width: " << w_in << endl;
+            cout << "--> Output Bit Width: " << w_out  << endl;
+        }
+        else
+        {
+            cout << "\nInformation: The input and output values must be interpreted as follows." << endl;
+            cout << "--> Input Format: Fixed Point <Unsigned, " << w_in << ", " << f_in << ">" << endl;
+            if(is_signed)
+                cout << "--> Output Format: Fixed Point <Signed, " << w_out << ", " << f_out << ">" << endl;
+            else
+                cout << "--> Output Format: Fixed Point <Unsigned, " << w_out << ", " << f_out << ">" << endl;
+        }
+
+        cout << "\nInformation: The results are as follows." << endl;
         for(int i = 0; i < final_size.size(); i++)
-            cout << "-->  File Name: " << table_name << "_" << i + 1 << "  Initial Size (bit): " << initial_size << "  Final Size (bit): " << final_size.at(i) << endl;
+            cout << "-->  File Name: " << table_name << "_v" << i + 1 << "  Initial Size (bit): " << initial_size << "  Final Size (bit): " << final_size.at(i) << endl;
     }
     else
     {
@@ -179,7 +203,7 @@ void compressedlut::compressedlut(const vector<long int>& table_data, const stri
             for(int i = 0; i < t.size(); i++)
             {
                 t_hb.push_back(t.at(i) >> w_l);
-                t_lb.push_back(t.at(i) & (((long)1 << w_l) - 1));
+                t_lb.push_back(t.at(i) & (((long int)1 << w_l) - 1));
             }
             
             long int cost_t_lb = (1 << w_in) * bit_width(*max_element(t_lb.begin(), t_lb.end()));
@@ -235,8 +259,8 @@ void compressedlut::compressedlut(const vector<long int>& table_data, const stri
 
         for(int i = 0; i < all_w_in.size(); i++)
         {
-            string rtl_file_path = output_path + "/" + table_name + "_" + to_string(i + 1) + ".v";
-            string hls_file_path = output_path + "/" + table_name + "_" + to_string(i + 1) + ".cpp";
+            string rtl_file_path = output_path + "/" + table_name + "_v" + to_string(i + 1) + ".v";
+            string hls_file_path = output_path + "/" + table_name + "_v" + to_string(i + 1) + ".cpp";
             rtl(rtl_file_path, table_name, all_w_in, all_w_out, all_w_l, all_w_s, all_t_lb, all_t_ust, all_t_bias, all_t_idx, all_t_rsh, i + 1);
             hls(hls_file_path, table_name, all_w_in, all_w_out, all_w_l, all_w_s, all_t_lb, all_t_ust, all_t_bias, all_t_idx, all_t_rsh, i + 1);
         }
@@ -276,15 +300,15 @@ long int compressedlut::hb_compression(bool ssc, const vector<long int>& t_hb, i
         {
             for(long int j = i+1; j < num_sub_table; j++)
             {
-                bool i_generates_j = true, j_generates_i = true;
                 for(int rsh = 0; rsh < 4; rsh++)
                 {
+                    bool i_generates_j = true, j_generates_i = true;
                     for (int p = 0; p < len_sub_table; p++)
                     {
                         long int value_i = t_st.at(i*len_sub_table+p);
                         long int value_j = t_st.at(j*len_sub_table+p);
-                        i_generates_j = ((value_i >> rsh) == value_j);
-                        j_generates_i = ((value_j >> rsh) == value_i);
+                        i_generates_j = i_generates_j && ((value_i >> rsh) == value_j);
+                        j_generates_i = j_generates_i && ((value_j >> rsh) == value_i);
                         if(i_generates_j == false && j_generates_i == false)
                             break;
                     }
@@ -693,6 +717,18 @@ int compressedlut::bit_width(long int value)
     if (value == 0)
         return 0;
     return floor(log2(abs(value)))+1;
+}
+
+int compressedlut::bit_width_signed(long int min_value, long int max_value) 
+{
+    int w = 1;
+    while(1)
+    {
+        if(min_value >= -((long int)1 << (w-1)) && max_value <= (((long int)1 << (w-1))-1))
+            return w;
+        else
+            w++;
+    }
 }
 
 void compressedlut::help() 
