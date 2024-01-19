@@ -1,19 +1,24 @@
 Instructions
 -------------------------------------------------------------------
 This program generates source code  for  univariate  functions.  It 
-works in two modes: you can either (1) specify  a  .txt  file  that 
-contains the values of a look-up table specifying f(x)  for  all  x 
+works in two modes: you can either (1) specify  a  text  file  that 
+contains the values of a lookup table specifying  f(x)  for  all  x 
 values, or (2) describe the function by providing its equation.
 
-1) Lookup table as .txt  File  -->  Please  specify  the  following 
+1) Lookup table as a text File -->  Please  specify  the  following 
    arguments:
-	-table (string)		: the path of the table,  in  which 
-	                          each line has a  single   integer  
-	                          value.  The  table  size must  be 
-	                          a power of 2. 
+	-table (string)		: path of  the  table,   in   which 
+	                          each   line    has    a    single   
+	                          hexadecimal value. The table size 
+	                          must be a power of 2.  The  input
+	                          and   output   bit   width    are 
+	                          determined  based  on  the  table 
+	                          size  and  the  maximum  absolute    
+	                          value of the table, respectively.
 	
-2) Function equation --> Please specify the following arguments:
-	-function (string)	: the  function's  equation  as   a 
+2) Lookup table as a math equation --> Please specify the following 
+   arguments:
+	-function (string)	: function's    equation    as    a 
 	                          string in quotation marks "".
 	-f_in (int)		: fractional  bit  width   of   the 
                                   function's   input.   Since   the 
@@ -21,15 +26,16 @@ values, or (2) describe the function by providing its equation.
                                   there are  no  integer  bits  for 
                                   the input.
 	-f_out (int)		: fractional  bit  width   of   the 
-	                          function's  output.  The   output 
-	                          integer bit width  is  determined 
+	                          function's output. The signedness 
+	                          and  integer  bit  width  of  the 
+	                          output       are       determined 
 	                          automatically.
 
 The following optional arguments can be used in either mode.
-	-name (string)		: output  table   and   file   name
-	-output (string)	: the   output   folder   for   the 
-	                          generated files. The folder  must
-	                          already exist.
+	-name (string)		: output table and file name.
+	-output (string)	: output folder for  the  generated
+	                          files. The  folder  must  already 
+	                          exist.                     
 	-mdbw (int)		: minimum decomposition bit  width. 
 	                          The default value is 2. 
 	-hbs (0/1)		: higher-bit  split.  The   default 
