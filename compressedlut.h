@@ -28,6 +28,7 @@ namespace compressedlut {
     void hls(const string& file_path, const string& table_name, const vector<int>& all_w_in, const vector<int>& all_w_out, const vector<int>& all_w_l, const vector<int>& all_w_s, const vector<vector<long int>>& all_t_lb, const vector<vector<long int>>& all_t_ust, const vector<vector<long int>>& all_t_bias, const vector<vector<long int>>& all_t_idx, const vector<vector<long int>>& all_t_rsh, int max_level);
     void plaintable_hls(const string& file_path, const string& table_name, const vector<long int>& table_data);
     int bit_width(long int value);
+    int bit_width_signed(long int min_value, long int max_value);
     void help();
 }
 
