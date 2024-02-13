@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
             string line;
             while (getline(table_file, line)) {
                 long int value;
-                value = stoi(line, 0, 16);
+                value = stol(line, 0, 16);
                 table_data.push_back(value);
             }
             table_file.close();
