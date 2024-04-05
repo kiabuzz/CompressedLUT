@@ -52,7 +52,7 @@ CompressedLUT has been developed as a part of the following publication.
     url = {https://doi.org/10.1145/3626202.3637575},
     doi = {10.1145/3626202.3637575},
     booktitle = {Proceedings of the 2024 ACM/SIGDA International Symposium on Field Programmable Gate Arrays},
-    pages = {},
+    pages = {2-11},
     numpages = {10},
     location = {Monterey, CA, USA},
     series = {FPGA '24}
